@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Home</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src='//libtl.com/sdk.js' data-zone='10733336' data-sdk='show_10733336'></script>
+    
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: #ffffff; text-align: center; margin: 0; padding-bottom: 80px; }
+        .bal-card { background: #1e293b; padding: 20px; margin: 20px 15px; border-radius: 15px; border: 2px solid #38bdf8; }
+        .btn { padding: 12px; margin: 8px; border-radius: 8px; font-size: 15px; font-weight: bold; width: 80%; border: none; cursor: pointer; color: white; }
+        .input-f { width: 75%; padding: 12px; margin: 5px; border-radius: 8px; border: 1px solid #38bdf8; background: #0f172a; color: white; font-size: 16px; }
+        .nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; background: #1e293b; padding: 10px 0; border-top: 2px solid #38bdf8; }
+        .nav-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="bal-card">
+    <div style="font-size: 13px;">আপনার বর্তমান পয়েন্ট</div>
+    <h1 id="bal" style="font-size: 30px; color: #22c55e;">0</h1>
+</div>
+
+<div id="content"></div>
+
+<div class="nav">
+    <button class="nav-btn" onclick="show('home')">🏠</button>
+    <button class="nav-btn" onclick="show('task')">📋</button>
+    <button class="nav-btn" onclick="show('withdraw')">💰</button>
+    <button class="nav-btn" onclick="show('support')">🎧</button>
+</div>
+
+<script>
+    let pts = parseInt(localStorage.getItem('pts')) || 0;
+    document.getElementById('bal').innerText = pts;
+
+    function show(p) {
+        let div = document.getElementById('content');
+        if(p=='home') {
+            div.innerHTML = `<h3>বিজ্ঞাপন জোন</h3>
+            <p style="font-size: 12px; color: #38bdf8;">প্রতি বিজ্ঞাপন ১০ পয়েন্ট</p>
+            <button class="btn" style="background:#f59e0b" id="ad-btn1" onclick="add(10); window.open('https://www.effectivegatecpm.com/fn2nth6w8p?key=eabea4db30059774d0871b8f08f7d306')">বিজ্ঞাপন</button>
+            <button class="btn" style="background:#f59e0b" onclick="add(10); window.open('https://omg10.com/4/10733426')">বিজ্ঞাপন</button>
+            <button class="btn" style="background:#f59e0b" onclick="add(10); window.open('https://omg10.com/4/10733425')">বিজ্ঞাপন</button>
+            <button class="btn" style="background:#f59e0b" onclick="add(10); window.open('https://omg10.com/4/10733397')">বিজ্ঞাপন</button>
+            <button class="btn" style="background:#f59e0b" onclick="add(10); show_10733336()">বিজ্ঞাপন</button>`;
+        }
+        else if(p=='task') div.innerHTML = `<h3>কাজ জোন</h3><button class="btn" style="background:#ec4899" onclick="getDaily()">ডেইলি ৫ পয়েন্ট</button>`;
+        else if(p=='withdraw') {
+            div.innerHTML = `<h3>উত্তোলন করুন</h3>
+            <select id="method" class="input-f"><option value="বিকাশ">বিকাশ</option><option value="নগদ">নগদ</option></select>
+            <input type="number" id="points" class="input-f" placeholder="কত পয়েন্ট নিবেন?">
+            <input type="number" id="number" class="input-f" placeholder="আপনার নম্বর">
+            <button class="btn" style="background:#22c55e" onclick="req()">রিকোয়েস্ট পাঠান</button>`;
+        }
+        else if(p=='support') div.innerHTML = `<h3>সাপোর্ট</h3><a href="https://t.me/jahangir_owner0"><button class="btn" style="background:#0ea5e9">অ্যাডমিন</button></a>`;
+    }
+
+    function add(amt) { 
+        pts += amt; 
+        localStorage.setItem('pts', pts); 
+        document.getElementById('bal').innerText = pts; 
+    }
+
+    function getDaily() { 
+        let today = new Date().toDateString(); 
+        if(localStorage.getItem('lastDate') === today) { alert("আজকের বোনাস নেওয়া হয়েছে!"); return; } 
+        add(5); 
+        localStorage.setItem('lastDate', today); 
+        alert("৫ পয়েন্ট যোগ হয়েছে!"); 
+    }
+
+    function req() {
+        let p = document.getElementById('points').value;
+        let n = document.getElementById('number').value;
+        if(p < 1000) { alert("ন্যূনতম ১০০০ পয়েন্ট লাগবে!"); return; }
+        if(n.length < 11) { alert("সঠিক নম্বর দিন!"); return; }
+        alert("আপনার রিকোয়েস্ট সফল হয়েছে!");
+    }
+
+    show('home');
+</script>
+</body>
+      </html>
+                    
