@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>Money Home</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: #ffffff; text-align: center; margin: 0; padding-bottom: 80px; }
+        .bal-card { background: #1e293b; padding: 20px; margin: 15px; border-radius: 15px; border: 2px solid #38bdf8; }
+        .btn { padding: 12px; margin: 8px; border-radius: 8px; font-size: 15px; font-weight: bold; width: 80%; border: none; cursor: pointer; color: white; }
+        .btn-ad { background: #f59e0b; }
+        .btn-task { background: #8b5cf6; }
+        .btn-with { background: #22c55e; }
+        .input-f { width: 70%; padding: 10px; border-radius: 8px; border: 1px solid #38bdf8; font-size: 15px; margin-bottom: 8px; background: #0f172a; color: white; }
+        .nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; background: #1e293b; padding: 10px 0; border-top: 2px solid #38bdf8; }
+        .nav-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: white; }
+        .info-text { font-size: 13px; color: #38bdf8; margin: 5px 0; font-weight: bold; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<div class="bal-card">
+    <div style="font-size: 13px;">আপনার মোট পয়েন্ট</div>
+    <h1 id="bal" style="font-size: 30px; color: #22c55e; margin: 5px 0;">0</h1>
+</div>
+
+<div id="content"></div>
+
+<div class="nav">
+    <button class="nav-btn" onclick="show('home')">🏠</button>
+    <button class="nav-btn" onclick="show('task')">📋</button>
+    <button class="nav-btn" onclick="show('refer')">👥</button>
+    <button class="nav-btn" onclick="show('withdraw')">💰</button>
+</div>
+
+<script>
+    const BOT_TOKEN = "8347566970:AAHNEZGK9rM62mjJS7DvHJfTr44ynK8LIvA"; 
+    const ADMIN_ID = "8499498098";
+    
+    let pts = parseInt(localStorage.getItem('pts')) || 0;
+    document.getElementById('bal').innerText = pts;
+
+    function show(p) {
+        let div = document.getElementById('content');
+        if(p=='home') div.innerHTML = `<h3>বিজ্ঞাপন জোন</h3><p class="info-text">প্রতি এডে ১০ পয়েন্ট<br>১০০টি এড দেখলে ১০০০ পয়েন্ট</p><button class="btn btn-ad" onclick="add(10); window.open('https://link1.com')">বিজ্ঞাপন ১</button><button class="btn btn-ad" onclick="add(10); window.open('https://link2.com')">বিজ্ঞাপন ২</button>`;
+        
+        if(p=='task') div.innerHTML = `<h3>কাজ জোন</h3><p class="info-text">প্রতি কাজে ১০০ পয়েন্ট</p><button class="btn btn-task" onclick="add(100)">কাজ করুন (+১০০)</button>`;
+        
+        if(p=='refer') div.innerHTML = `<h3>রেফার জোন</h3><p class="info-text">প্রতি রেফারে ৩০০ পয়েন্ট</p><div style="background:#0f172a; padding:10px; margin:10px auto; border-radius:5px; font-size:12px; width:70%; border:1px solid #38bdf8;">t.me/online_income9_bot</div><button class="btn btn-task" onclick="copyRef()">লিঙ্ক কপি করুন</button>`;
+        
+        if(p=='withdraw') div.innerHTML = `<h3>উত্তোলন করুন</h3><select id="method" class="input-f"><option value="বিকাশ">বিকাশ</option><option value="নগদ">নগদ</option></select><input type="number" id="wPoints" class="input-f" placeholder="পয়েন্টের পরিমাণ"><input type="text" id="num" class="input-f" placeholder="আপনার নম্বর"><button class="btn btn-with" onclick="req()">রিকোয়েস্ট পাঠান</button>`;
+    }
+
+    function add(amt) { pts += amt; localStorage.setItem('pts', pts); document.getElementById('bal').innerText = pts; alert("পয়েন্ট যোগ হয়েছে!"); }
+    function copyRef() { navigator.clipboard.writeText("t.me/online_income9_bot"); alert("লিঙ্ক কপি হয়েছে!"); }
+
+    function req() {
+        let m = document.getElementById('method').value;
+        let w = parseInt(document.getElementById('wPoints').value);
+        let n = document.getElementById('num').value;
+        
+        if(isNaN(w) || w > pts || w < 1000) { alert("পয়েন্ট সঠিক নয় বা পর্যাপ্ত নেই (ন্যূনতম ১০০০)!"); return; }
+        if(n.length < 11) { alert("সঠিক নম্বর দিন"); return; }
+        
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=🔔 নতুন উত্তোলন রিকোয়েস্ট!%0Aপদ্ধতি: ${m}%0Aপয়েন্ট: ${w}%0Aনম্বর: ${n}%0Aইউজার পয়েন্ট: ${pts}`);
+        
+        pts -= w; 
+        localStorage.setItem('pts', pts);
+        document.getElementById('bal').innerText = pts;
+        alert("রিকোয়েস্ট সফল! পয়েন্ট কাটা হয়েছে।");
+    }
+    show('home');
+</script>
+</body>
+  </html>
+  
