@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <title>Money Home</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; text-align: center; margin: 0; padding-bottom: 120px; }
+        .card { background: #1e293b; padding: 30px; margin: 20px; border-radius: 25px; border: 2px solid #334155; }
+        .nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; background: #0f172a; padding: 20px 0; border-top: 3px solid #334155; }
+        
+        button { background: #2563eb; color: white; border: none; padding: 25px 40px; border-radius: 20px; font-size: 20px; font-weight: bold; margin: 15px; width: 85%; cursor: pointer; }
+        .input-f { width: 80%; padding: 25px; border-radius: 20px; border: 2px solid #334155; font-size: 20px; margin-bottom: 20px; color: #000; }
+        select { width: 85%; padding: 25px; border-radius: 20px; font-size: 20px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <h1 style="margin-top: 20px;">Money Home</h1>
+    <div class="card">
+        <h3>আপনার মোট পয়েন্ট</h3>
+        <h1 id="bal" style="font-size: 60px; color: #22c55e;">0</h1>
+    </div>
+    <div id="content"></div>
+</div>
+
+<div class="nav">
+    <button style="width: 20%; padding: 20px;" onclick="show('home')">🏠</button>
+    <button style="width: 20%; padding: 20px;" onclick="show('task')">📋</button>
+    <button style="width: 20%; padding: 20px;" onclick="show('refer')">👥</button>
+    <button style="width: 20%; padding: 20px;" onclick="show('withdraw')">💰</button>
+</div>
+
+<script>
+    const BOT_TOKEN = "8347566970:AAHNEZGK9rM62mjJS7DvHJfTr44ynK8LIvA"; 
+    const ADMIN_ID = "8499498098";
+    
+    let pts = parseInt(localStorage.getItem('pts')) || 0;
+    document.getElementById('bal').innerText = pts;
+
+    function show(p) {
+        let div = document.getElementById('content');
+        if(p=='home') div.innerHTML = `<h3>বিজ্ঞাপন দেখুন</h3><button onclick="window.open('আপনার_লিঙ্ক_১')">বিজ্ঞাপন ১ (Adsterra)</button><button onclick="window.open('আপনার_লিঙ্ক_২')">বিজ্ঞাপন ২ (Monetag)</button><button onclick="window.open('আপনার_লিঙ্ক_৩')">বিজ্ঞাপন ৩ (Monetag)</button>`;
+        if(p=='task') div.innerHTML = `<h3>কাজ সম্পন্ন করুন</h3><button onclick="add(100)">কাজ করুন (+১০০ পয়েন্ট)</button>`;
+        if(p=='refer') div.innerHTML = `<h3>রেফার করুন</h3><button onclick="copyRef()">রেফার লিঙ্ক কপি করুন (৩০০ পয়েন্ট)</button>`;
+        if(p=='withdraw') div.innerHTML = `<h3>উত্তোলন করুন</h3><select id="method"><option value="বিকাশ (২০০০ পয়েন্ট)">বিকাশ</option><option value="নগদ (৫০০০ পয়েন্ট)">নগদ</option></select><br><input id="num" class="input-f" placeholder="আপনার নম্বর"><br><button onclick="req()">রিকোয়েস্ট পাঠান</button>`;
+    }
+
+    function add(amount) { pts += amount; localStorage.setItem('pts', pts); document.getElementById('bal').innerText = pts; alert("পয়েন্ট যোগ হয়েছে!"); }
+    function copyRef() { navigator.clipboard.writeText("t.me/online_income9_bot"); alert("লিঙ্ক কপি হয়েছে!"); }
+
+    function req() {
+        let m = document.getElementById('method').value;
+        let n = document.getElementById('num').value;
+        let cost = m.includes("বিকাশ") ? 2000 : 5000;
+        if(n.length < 11) { alert("সঠিক নম্বর দিন"); return; }
+        if(pts < cost) { alert("পর্যাপ্ত পয়েন্ট নেই!"); return; }
+        
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${ADMIN_ID}&text=🔔 নতুন উত্তোলন রিকোয়েস্ট!%0Aপদ্ধতি: ${m}%0Aনম্বর: ${n}%0Aইউজার পয়েন্ট: ${pts}`);
+        
+        pts -= cost; localStorage.setItem('pts', pts); document.getElementById('bal').innerText = pts;
+        alert("রিকোয়েস্ট সফল! অ্যাডমিনের কাছে পাঠানো হয়েছে।");
+    }
+</script>
+</body>
+  </html>
+  
