@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Income 9 - Final Stable</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background: #0f172a; color: white; text-align: center; padding: 10px; font-family: sans-serif; margin-bottom: 100px; overflow-x: hidden; }
+        .promo-header { background: linear-gradient(90deg, #8b5cf6, #7c3aed); padding: 15px; border-radius: 12px; margin-bottom: 15px; font-weight: bold; border: 1px solid #a78bfa; }
+        .box { background: #1e293b; padding: 20px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #334155; position: relative; }
+        .profile-img { width: 75px; height: 75px; border-radius: 50%; border: 3px solid #38bdf8; margin-bottom: 10px; object-fit: cover; }
+        .btn { padding: 14px; margin: 8px 0; width: 100%; border-radius: 12px; border: none; cursor: pointer; color: white; font-weight: bold; font-size: 15px; transition: 0.3s; }
+        .btn:disabled { background: #475569 !important; cursor: not-allowed; opacity: 0.6; }
+        
+        /* ভিডিওর মতো লোডিং ডিজাইন */
+        #timerOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.98); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .loader { border: 8px solid #334155; border-top: 8px solid #38bdf8; border-radius: 50%; width: 70px; height: 70px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .timer-txt { font-size: 32px; font-weight: bold; color: #38bdf8; }
+
+        /* ভিডিওর মতো সাকসেস পপআপ */
+        #successPopup { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 12px 25px; border-radius: 50px; font-weight: bold; z-index: 10000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); animation: slideDown 0.5s ease; }
+        @keyframes slideDown { from { top: -50px; } to { top: 20px; } }
+
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e293b; display: flex; justify-content: space-around; padding: 12px 0; border-top: 2px solid #38bdf8; z-index: 1000; }
+        .nav-item { color: #94a3b8; font-size: 11px; cursor: pointer; flex: 1; text-align: center; }
+        .nav-item.active { color: #38bdf8; font-weight: bold; }
+        .section { display: none; }
+        .section.active { display: block; }
+        input, select { padding: 12px; width: 100%; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; margin-top: 8px; box-sizing: border-box; text-align: center; }
+    </style>
+</head>
+<body onload="init()">
+
+    <div id="successPopup">✅ Reward credited successfully!</div>
+
+    <div class="promo-header">🚀 রেফার করলে ৩০০ পয়েন্ট বোনাস!</div>
+
+    <div id="timerOverlay">
+        <div class="loader"></div>
+        <div class="timer-txt" id="timerCircle">0</div>
+        <p style="margin-top:15px; font-size: 14px;">অ্যাড শেষ হওয়া পর্যন্ত অপেক্ষা করুন...</p>
+    </div>
+
+    <div id="home" class="section active">
+        <div class="box">
+            <img id="uPic" class="profile-img" src="https://via.placeholder.com/75" alt="Profile">
+            <h2 id="uName">লোডিং...</h2>
+            <p style="font-size: 24px; color: #38bdf8; font-weight: bold;">ব্যালেন্স: <span id="userBal">0</span> পয়েন্ট</p>
+        </div>
+        <button class="btn" style="background: #f59e0b;" onclick="claimDaily()">🎁 ডেইলি বোনাস (৫ পয়েন্ট)</button>
+    </div>
+
+    <div id="tasks" class="section">
+        <div class="box">
+            <span style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 10px;">একটি অ্যাড ১০ পয়েন্ট | মোট ৯০টি অ্যাড</span>
+            <button id="btn_ad1" class="btn" style="background: #6366f1;" onclick="startTask('ad1', 'https://omg10.com/4/10733336')">WATCH AD & EARN 1</button>
+            <button id="btn_ad2" class="btn" style="background: #6366f1;" onclick="startTask('ad2', 'https://omg10.com/4/10733425')">WATCH AD & EARN 2</button>
+            <button id="btn_ad3" class="btn" style="background: #6366f1;" onclick="startTask('ad3', 'https://omg10.com/4/10733397')">WATCH AD & EARN 3</button>
+        </div>
+        <div class="box">
+            <p style="color: #38bdf8; font-weight: bold;">স্পেশাল টাস্ক (১০ পয়েন্ট)</p>
+            <button id="ytBtn" class="btn" style="background: #ef4444;" onclick="startTask('yt_once', 'https://www.youtube.com/@Jahangir_owner')">YouTube সাবস্ক্রাইব</button>
+            <button id="adsBtn" class="btn" style="background: #8b5cf6;" onclick="startTask('ads_once', 'https://www.effectivegatecpm.com/h2kfpp7yf?key=e023f627c547859ce474556b8d33c173')">Adsterra টাস্ক</button>
+        </div>
+    </div>
+
+    <div id="refer" class="section">
+        <div class="box">
+            <h3>রেফার করে ইনকাম</h3>
+            <input type="text" id="rLink" readonly>
+            <button class="btn" style="background: #8b5cf6; margin-top:10px;" onclick="copyLink()">লিঙ্ক কপি করুন</button>
+            <p id="totalRef" style="color: #fbbf24; font-weight: bold; margin-top:15px;">আপনার মোট রেফার: ০</p>
+        </div>
+    </div>
+
+    <div id="withdraw" class="section">
+        <div class="box">
+            <h3>টাকা উত্তোলন</h3>
+            <select id="method"><option value="বিকাশ">বিকাশ</option><option value="নগদ">নগদ</option></select>
+            <input type="number" id="wAmount" placeholder="পয়েন্টের পরিমাণ">
+            <input type="text" id="wNumber" placeholder="মোবাইল নাম্বার">
+            <button class="btn" style="background: #10b981; margin-top:20px;" onclick="requestWithdraw()">রিকোয়েস্ট পাঠান</button>
+            <button class="btn" style="background: #0ea5e9; margin-top:10px;" onclick="window.open('https://t.me/jahangir_onlin_income2')">📊 পেমেন্ট প্রুফ চ্যানেল</button>
+        </div>
+    </div>
+
+    <div id="support" class="section">
+        <div class="box">
+            <h3>সাপোর্ট সেন্টার</h3>
+            <button class="btn" style="background: #2563eb;" onclick="window.open('https://t.me/jahangir_owner0')">💬 অ্যাডমিনের সাথে যোগাযোগ করুন</button>
+            <button class="btn" style="background: #0ea5e9; margin-top:10px;" onclick="window.open('https://t.me/jahangir_onlin_income')">📢 আমাদের মেইন চ্যানেল</button>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="showSec('home', this)">🏠 হোম</div>
+        <div class="nav-item" onclick="showSec('tasks', this)">🎯 টাস্ক</div>
+        <div class="nav-item" onclick="showSec('refer', this)">👥 রেফার</div>
+        <div class="nav-item" onclick="showSec('withdraw', this)">💰 উইথড্র</div>
+        <div class="nav-item" onclick="showSec('support', this)">🛠 সাপোর্ট</div>
+    </div>
+
+<script>
+    let tg = window.Telegram.WebApp;
+    const _x = atob("ODM0NzU2Njk3MDpBQUhORVpHSzlyTTZ2bmJKUzVEdkpmVHI0NHluSzhMSXZB"); 
+    const _y = atob("ODQ5OTQ5ODA5OA=="); 
+
+    let bal = parseInt(atob(localStorage.getItem('_ub_j9_vfinal') || btoa('0')));
+
+    function init() {
+        tg.expand();
+        checkDailyReset();
+        updateUI();
+        if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            let u = tg.initDataUnsafe.user;
+            document.getElementById('uName').innerText = u.first_name;
+            if(u.photo_url) document.getElementById('uPic').src = u.photo_url;
+            document.getElementById('rLink').value = "https://t.me/online_income9_bot?start=" + u.id;
+        }
+        updateStatus();
+    }
+
+    function checkDailyReset() {
+        let today = new Date().toDateString();
+        if (localStorage.getItem('_last_reset_vfinal') !== today) {
+            localStorage.setItem('count_ad1', '0');
+            localStorage.setItem('count_ad2', '0');
+            localStorage.setItem('count_ad3', '0');
+            localStorage.setItem('_last_reset_vfinal', today);
+        }
+    }
+
+    function startTask(id, url) {
+        let count = parseInt(localStorage.getItem('count_'+id)) || 0;
+        let isOnce = id.includes('once');
+        
+        if(isOnce && localStorage.getItem('lock_'+id)) {
+            window.open(url, '_blank'); alert("একবার পয়েন্ট নিয়েছেন!"); return;
+        }
+        if(!isOnce && count >= 30) return;
+
+        let left = (count % 2 === 0) ? 15 : 30;
+        if(isOnce) left = 15;
+
+        document.getElementById('timerOverlay').style.display = 'flex';
+        document.getElementById('timerCircle').innerText = left;
+        window.open(url, '_blank');
+
+        let interval = setInterval(() => {
+            left--;
+            document.getElementById('timerCircle').innerText = left;
+            if(left <= 0) {
+                clearInterval(interval);
+                document.getElementById('timerOverlay').style.display = 'none';
+                bal += 10;
+                if(isOnce) localStorage.setItem('lock_'+id, 'true');
+                else localStorage.setItem('count_'+id, count + 1);
+                saveData(); updateStatus(); showSuccess();
+            }
+        }, 1000);
+    }
+
+    function showSuccess() {
+        let pop = document.getElementById('successPopup');
+        pop.style.display = 'block';
+        setTimeout(() => { pop.style.display = 'none'; }, 3000);
+    }
+
+    function updateStatus() {
+        ['ad1', 'ad2', 'ad3'].forEach(id => {
+            let c = parseInt(localStorage.getItem('count_'+id)) || 0;
+            let btn = document.getElementById('btn_'+id);
+            if(c >= 30) { btn.disabled = true; btn.innerText = "TODAY'S LIMIT END ✅"; }
+        });
+    }
+
+    function showSec(id, el) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('active'); el.classList.add('active');
+    }
+
+    function requestWithdraw() {
+        let amt = document.getElementById('wAmount').value;
+        let num = document.getElementById('wNumber').value;
+        let met = document.getElementById('method').value;
+        let min = (met === 'বিকাশ') ? 3000 : 5000;
+        if(!amt || amt < min || amt > bal) { alert("ব্যালেন্স নেই বা ভুল এমাউন্ট!"); return; }
+        let msg = `💰 Withdraw\n👤 ${document.getElementById('uName').innerText}\n💸 Point: ${amt}\n📱 ${num}\n💳 ${met}`;
+        fetch(`https://api.telegram.org/bot${_x}/sendMessage?chat_id=${_y}&text=${encodeURIComponent(msg)}&parse_mode=HTML`)
+        .then(() => { bal -= amt; saveData(); alert("রিকোয়েস্ট পাঠানো হয়েছে!"); });
+    }
+
+    function saveData() { localStorage.setItem('_ub_j9_vfinal', btoa(bal.toString())); updateUI(); }
+    function updateUI() { document.getElementById('userBal').innerText = bal; }
+    function copyLink() { document.getElementById('rLink').select(); document.execCommand('copy'); alert("লিঙ্ক কপি হয়েছে!"); }
+    
+    function claimDaily() {
+        let d = new Date().toDateString();
+        if(localStorage.getItem('_daily_claim_vfinal') === d) alert("আজ নেওয়া শেষ!");
+        else { bal += 5; localStorage.setItem('_daily_claim_vfinal', d); saveData(); showSuccess(); }
+    }
+</script>
+</body>
+  </html>
+  
