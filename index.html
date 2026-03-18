@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Income 9 - Final Build</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background: #0f172a; color: white; text-align: center; padding: 10px; font-family: sans-serif; margin-bottom: 90px; overflow-x: hidden; }
+        
+        /* উপরের বেগুনি প্রমোশন ব্যানার */
+        .promo-header { 
+            background: linear-gradient(90deg, #8b5cf6, #7c3aed); 
+            padding: 15px; border-radius: 12px; margin-bottom: 15px; 
+            font-weight: bold; font-size: 18px; border: 1px solid #a78bfa;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .box { background: #1e293b; padding: 20px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #334155; }
+        
+        /* প্রোফাইল পিকচার স্টাইল */
+        .profile-img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #38bdf8; margin-bottom: 10px; object-fit: cover; background: #334155; }
+        
+        .btn { padding: 12px; margin: 8px 0; width: 100%; border-radius: 10px; border: none; cursor: pointer; color: white; font-weight: bold; transition: 0.3s; display: block; text-decoration: none; box-sizing: border-box; font-size: 16px; }
+        .btn:disabled { background: #475569 !important; cursor: not-allowed; opacity: 0.5; }
+        
+        /* আপনার স্ক্রিনশট স্টাইল গোল নীল টাইমার */
+        #timerOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .timer-circle { 
+            width: 120px; height: 120px; 
+            border: 6px solid #38bdf8; /* সেই নীল বর্ডার */
+            border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; 
+            font-size: 36px; font-weight: bold; color: #38bdf8; 
+            margin-bottom: 20px; 
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); 
+        }
+
+        /* নেভিগেশন বার */
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e293b; display: flex; justify-content: space-around; padding: 12px 0; border-top: 2px solid #38bdf8; z-index: 1000; }
+        .nav-item { color: #94a3b8; font-size: 11px; cursor: pointer; flex: 1; text-align: center; }
+        .nav-item.active { color: #38bdf8; font-weight: bold; }
+        
+        .section { display: none; padding-bottom: 20px; }
+        .section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        input, select { padding: 12px; width: 100%; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; margin-top: 8px; box-sizing: border-box; text-align: center; font-size: 15px; }
+    </style>
+</head>
+<body onload="init()">
+
+    <div class="promo-header">🚀 রেফার করলে ৩০০ পয়েন্ট বোনাস!</div>
+
+    <div id="timerOverlay">
+        <h3 style="margin-bottom: 15px; letter-spacing: 1px;">বিজ্ঞাপন চলছে...</h3>
+        <div class="timer-circle" id="timerCircle">0</div>
+        <p style="color: #94a3b8; padding: 0 20px; font-size: 14px;">অ্যাড শেষ না হওয়া পর্যন্ত অপেক্ষা করুন।</p>
+    </div>
+
+    <div id="home" class="section active">
+        <div class="box">
+            <img id="uPic" class="profile-img" src="https://via.placeholder.com/80?text=User" alt="Profile">
+            <h2 id="uName" style="margin: 5px 0;">ইউজার নাম</h2>
+            <p style="font-size: 24px; color: #38bdf8; font-weight: bold; margin-top: 10px;">ব্যালেন্স: <span id="userBal">0</span> পয়েন্ট</p>
+        </div>
+        <button class="btn" style="background: #f59e0b; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);" onclick="claimDaily()">🎁 ডেইলি বোনাস (৫ পয়েন্ট)</button>
+    </div>
+
+    <div id="tasks" class="section">
+        <div class="box">
+            <p style="font-size: 14px; color: #fbbf24; font-weight: bold; margin-bottom: 15px;">অ্যাড টাস্ক (প্রতিটি ১০ পয়েন্ট)</p>
+            <button class="btn" style="background: #6366f1;" onclick="startTask('ad1', 'https://omg10.com/4/10733336')">বিজ্ঞাপন ১</button>
+            <button class="btn" style="background: #6366f1;" onclick="startTask('ad2', 'https://omg10.com/4/10733425')">বিজ্ঞাপন ২</button>
+            <button class="btn" style="background: #6366f1;" onclick="startTask('ad3', 'https://omg10.com/4/10733397')">বিজ্ঞাপন ৩</button>
+        </div>
+        <div class="box">
+            <p style="font-size: 14px; color: #38bdf8; font-weight: bold; margin-bottom: 15px;">স্পেশাল টাস্ক</p>
+            <button id="adsBtn" class="btn" style="background: #8b5cf6;" onclick="startTask('ads_once', 'https://www.effectivegatecpm.com/h2kfpp7yf?key=e023f627c547859ce474556b8d33c173')">Adsterra (১০ পয়েন্ট)</button>
+            <button id="ytBtn" class="btn" style="background: #ef4444;" onclick="startTask('yt_once', 'https://www.youtube.com/@Jahangir_owner')">YouTube (১০ পয়েন্ট)</button>
+        </div>
+    </div>
+
+    <div id="refer" class="section">
+        <div class="box">
+            <h3>আপনার রেফার লিঙ্ক</h3>
+            <input type="text" id="rLink" readonly>
+            <button class="btn" style="background: #8b5cf6; margin-top:15px;" onclick="copyLink()">লিঙ্ক কপি করুন</button>
+            <p style="font-size: 13px; margin-top: 20px; color: #94a3b8; line-height: 1.6;">আপনার লিঙ্কে কেউ জয়েন করলে আপনি পাবেন ৩০০ পয়েন্ট বোনাস!</p>
+        </div>
+    </div>
+
+    <div id="withdraw" class="section">
+        <div class="box">
+            <h3>টাকা উত্তোলন</h3>
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px;">বিকাশে সর্বনিম্ন ৩০০০ | নগদে ৫০০০ পয়েন্ট</p>
+            <select id="method"><option value="বিকাশ">বিকাশ</option><option value="নগদ">নগদ</option></select>
+            <input type="number" id="wAmount" placeholder="পয়েন্টের পরিমাণ">
+            <input type="text" id="wNumber" placeholder="মোবাইল নাম্বার">
+            <button class="btn" style="background: #10b981; margin-top:20px;" onclick="requestWithdraw()">রিকোয়েস্ট পাঠান</button>
+            <a href="https://t.me/jahangir_onlin_income2" target="_blank" class="btn" style="background: #0ea5e9; font-size: 14px; margin-top:15px;">📊 ইনকাম প্রুফ চ্যানেল</a>
+        </div>
+    </div>
+
+    <div id="support" class="section">
+        <div class="box">
+            <h3>সাপোর্ট সেন্টার</h3>
+            <button class="btn" style="background: #2563eb;" onclick="window.open('https://t.me/jahangir_owner0')">💬 এডমিন সাপোর্ট (@jahangir_owner0)</button>
+            <button class="btn" style="background: #0ea5e9;" onclick="window.open('https://t.me/jahangir_onlin_income')">📢 মেইন চ্যানেল</button>
+            <p style="font-size: 12px; margin-top: 15px; color: #94a3b8;">যেকোনো পেমেন্ট বা টেকনিক্যাল সমস্যার জন্য সরাসরি যোগাযোগ করুন।</p>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="showSec('home', this)">🏠 হোম</div>
+        <div class="nav-item" onclick="showSec('tasks', this)">🎯 টাস্ক</div>
+        <div class="nav-item" onclick="showSec('refer', this)">👥 রেফার</div>
+        <div class="nav-item" onclick="showSec('withdraw', this)">💰 উইথড্র</div>
+        <div class="nav-item" onclick="showSec('support', this)">🛠 সাপোর্ট</div>
+    </div>
+
+<script>
+    let tg = window.Telegram.WebApp;
+    const _t = "8347566970:AAHNEZGK9rM62njJS7DvJfTr44ynK8LIvA"; 
+    const _c = "8499498098"; 
+
+    // ডাটা সেভ করার জন্য কি (Key)
+    let bal = parseInt(atob(localStorage.getItem('_ub_j9_v500') || btoa('0')));
+
+    function init() {
+        tg.expand();
+        updateUI();
+        
+        // টেলিগ্রাম প্রোফাইল পিকচার ও নাম নেওয়ার অংশ
+        if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            let u = tg.initDataUnsafe.user;
+            document.getElementById('uName').innerText = u.first_name + (u.last_name ? " " + u.last_name : "");
+            if(u.photo_url) {
+                document.getElementById('uPic').src = u.photo_url;
+            }
+            // রেফার লিঙ্ক সেট করা
+            document.getElementById('rLink').value = "https://t.me/online_income9_bot?start=" + u.id;
+        }
+        checkLocks();
+    }
+
+    function startTask(id, url) {
+        if(localStorage.getItem('lock_'+id)) return;
+        let count = parseInt(localStorage.getItem('count_'+id)) || 0;
+        if(id.startsWith('ad') && count >= 30) { alert("আজকের লিমিট শেষ!"); return; }
+
+        // আপনার চাওয়া ১৫ ও ৩০ সেকেন্ডের লজিক
+        let left = (count % 2 === 0) ? 15 : 30; 
+        if(id.includes('once')) left = 15;
+
+        document.getElementById('timerOverlay').style.display = 'flex';
+        document.getElementById('timerCircle').innerText = left;
+        window.open(url, '_blank');
+
+        let interval = setInterval(() => {
+            left--;
+            document.getElementById('timerCircle').innerText = left;
+            if(left <= 0) {
+                clearInterval(interval);
+                document.getElementById('timerOverlay').style.display = 'none';
+                bal += 10;
+                if(id.includes('once')) localStorage.setItem('lock_'+id, 'true');
+                else localStorage.setItem('count_'+id, count + 1);
+                saveData();
+                checkLocks();
+                alert("সাফল্যের সাথে ১০ পয়েন্ট যোগ হয়েছে!");
+            }
+        }, 1000);
+    }
+
+    function showSec(id, el) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        el.classList.add('active');
+    }
+
+    function requestWithdraw() {
+        let amt = document.getElementById('wAmount').value;
+        let num = document.getElementById('wNumber').value;
+        let met = document.getElementById('method').value;
+        let min = (met === 'বিকাশ') ? 3000 : 5000;
+        
+        if(!amt || !num || amt < min || amt > bal) { 
+            alert(`দুঃখিত! ${met}-এ সর্বনিম্ন ${min} পয়েন্ট লাগবে এবং ব্যালেন্স থাকতে হবে।`); 
+            return; 
+        }
+        
+        let msg = `💰 <b>Withdraw Request</b>\n\n👤 User: ${document.getElementById('uName').innerText}\n💵 Points: ${amt}\n📱 Number: ${num}\n💳 Method: ${met}`;
+        
+        fetch(`https://api.telegram.org/bot${_t}/sendMessage?chat_id=${_c}&text=${encodeURIComponent(msg)}&parse_mode=HTML`)
+        .then(() => { 
+            bal -= amt; 
+            saveData(); 
+            alert("আপনার রিকোয়েস্টটি সফলভাবে পাঠানো হয়েছে!"); 
+        });
+    }
+
+    function saveData() { localStorage.setItem('_ub_j9_v500', btoa(bal.toString())); updateUI(); }
+    function updateUI() { document.getElementById('userBal').innerText = bal; }
+    
+    function checkLocks() {
+        if(localStorage.getItem('lock_ads_once')) { 
+            document.getElementById('adsBtn').disabled = true; 
+            document.getElementById('adsBtn').innerText = "Done ✅"; 
+        }
+        if(localStorage.getItem('lock_yt_once')) { 
+            document.getElementById('ytBtn').disabled = true; 
+            document.getElementById('ytBtn').innerText = "Done ✅"; 
+        }
+    }
+
+    function copyLink() { 
+        let link = document.getElementById('rLink'); 
+        link.select(); 
+        document.execCommand('copy'); 
+        alert("আপনার রেফার লিঙ্ক কপি হয়েছে! বন্ধুদের শেয়ার করুন।"); 
+    }
+
+    function claimDaily() {
+        let d = new Date().toDateString();
+        if(localStorage.getItem('_d_j9_v500') === d) {
+            alert("আপনি আজ অলরেডি বোনাস নিয়েছেন!");
+        } else { 
+            bal += 5; 
+            localStorage.setItem('_d_j9_v500', d); 
+            saveData(); 
+            alert("অভিনন্দন! ৫ পয়েন্ট ডেইলি বোনাস পেয়েছেন।"); 
+        }
+    }
+</script>
+</body>
+  </html>
+  
