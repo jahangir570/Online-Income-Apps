@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Online Income 9 - Referral Edition</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background: #0f172a; color: white; text-align: center; padding: 10px; font-family: sans-serif; margin-bottom: 100px; overflow-x: hidden; }
+        .promo-header { background: #f59e0b; color: #000; padding: 8px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; font-size: 13px; }
+        .box { background: #1e293b; padding: 20px; border-radius: 15px; margin-bottom: 12px; border: 1px solid #334155; position: relative; }
+        .profile-img { width: 75px; height: 75px; border-radius: 50%; border: 3px solid #38bdf8; margin-bottom: 10px; object-fit: cover; }
+        .btn { padding: 14px; margin: 8px 0; width: 100%; border-radius: 12px; border: none; cursor: pointer; color: white; font-weight: bold; font-size: 15px; display: block; text-decoration: none; }
+        .btn:disabled { background: #475569 !important; cursor: not-allowed; opacity: 0.8; }
+        
+        /* ফুল স্ক্রিন অ্যাড ওভারলে */
+        #strictAdOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #0f172a; z-index: 99999; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .ad-container {
+            width: 90%; max-width: 350px; background: white; border-radius: 20px; overflow: hidden; position: relative; color: #1e293b;
+        }
+        .ad-img { width: 100%; height: 200px; object-fit: cover; }
+        .ad-timer-badge {
+            position: absolute; top: 15px; right: 15px; background: rgba(0, 0, 0, 0.7);
+            color: white; width: 35px; height: 35px; border-radius: 50%; display: flex;
+            justify-content: center; align-items: center; font-size: 14px; font-weight: bold; border: 2px solid #f59e0b;
+        }
+        .cross-icon {
+            display: none; position: absolute; top: 10px; right: 10px; background: #ef4444;
+            color: white; width: 30px; height: 30px; border-radius: 50%; justify-content: center;
+            align-items: center; font-size: 20px; font-weight: bold; cursor: pointer;
+        }
+
+        /* নেভিগেশন */
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e293b; display: flex; justify-content: space-around; padding: 12px 0; border-top: 2px solid #38bdf8; z-index: 1000; }
+        .nav-item { color: #94a3b8; font-size: 11px; cursor: pointer; flex: 1; text-align: center; }
+        .nav-item.active { color: #38bdf8; font-weight: bold; }
+        .section { display: none; }
+        .section.active { display: block; }
+        input { padding: 12px; width: 100%; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; text-align: center; }
+    </style>
+</head>
+<body onload="init()">
+
+    <div id="strictAdOverlay">
+        <div id="closeAdIcon" class="cross-icon" onclick="rewardUser()">✕</div>
+        <div class="ad-container">
+            <div class="ad-timer-badge" id="lockTimer">15</div>
+            <img src="https://img.freepik.com/free-vector/gradient-stock-market-concept_23-2149166910.jpg" class="ad-img">
+            <div style="padding: 20px; text-align: left;">
+                <h3 style="margin:0 0 10px 0;">Special Offer</h3>
+                <p style="font-size: 14px; color: #64748b;">টাইমার শেষ হলে উপরে আসা ক্রস (✕) আইকনে ক্লিক করুন।</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="promo-header">🚀 প্রতি সফল রেফারে ৩০০ পয়েন্ট বোনাস!</div>
+
+    <div id="home" class="section active">
+        <div class="box">
+            <img id="uPic" class="profile-img" src="https://via.placeholder.com/75">
+            <h2 id="uName">লোডিং...</h2>
+            <p style="font-size: 24px; color: #38bdf8; font-weight: bold;">ব্যালেন্স: <span id="userBal">0</span> পয়েন্ট</p>
+        </div>
+        <button class="btn" style="background: #f59e0b;" onclick="claimDaily()">🎁 ডেইলি বোনাস</button>
+    </div>
+
+    <div id="tasks" class="section">
+        <div class="box">
+            <button id="btn_ad1" class="btn" style="background: #6366f1;" onclick="openLockedAd('ad1', 'https://omg10.com/4/10733426')">অ্যাড বাটন ১</button>
+            <button id="btn_ad2" class="btn" style="background: #10b981;" onclick="openLockedAd('ad2', 'https://bold-consequence.com/VEP0xl')">অ্যাড বাটন ২</button>
+        </div>
+    </div>
+
+    <div id="refer" class="section">
+        <div class="box">
+            <h3>👥 আপনার রেফারেল স্ট্যাটাস</h3>
+            <p style="font-size: 20px; color: #fbbf24; font-weight: bold; margin-bottom: 20px;">
+                মোট রেফার: <span id="refCountDisplay">০</span> জন
+            </p>
+            <p style="font-size: 12px; color: #94a3b8;">আপনার ইনভাইট লিঙ্ক:</p>
+            <input type="text" id="rLink" readonly>
+            <button class="btn" style="background: #8b5cf6; margin-top:10px;" onclick="copyLink()">লিঙ্ক কপি করুন</button>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-item active" onclick="showSec('home', this)">🏠 হোম</div>
+        <div class="nav-item" onclick="showSec('tasks', this)">🎯 টাস্ক</div>
+        <div class="nav-item" onclick="showSec('refer', this)">👥 রেফার</div>
+    </div>
+
+<script>
+    let tg = window.Telegram.WebApp;
+    const _botToken = "8743403061:AAFFOsztmCSikiDaWc8o0Wn8hjNUaiIvLX4"; 
+    const _adminId = "8499498098"; 
+
+    // ডাটা লোড
+    let bal = parseInt(atob(localStorage.getItem('_ub_j9_v99') || btoa('0')));
+    let totalRefs = parseInt(localStorage.getItem('_total_refs_v99') || '0');
+    let currentAdKey = '';
+    let isLocked = false;
+
+    function init() {
+        tg.expand();
+        updateUI();
+        if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            let u = tg.initDataUnsafe.user;
+            document.getElementById('uName').innerText = u.first_name;
+            if(u.photo_url) document.getElementById('uPic').src = u.photo_url;
+            document.getElementById('rLink').value = "https://t.me/online_income9_bot?start=" + u.id;
+            
+            // রেফারেল চেক লজিক
+            const urlParams = new URLSearchParams(window.location.search);
+            const refBy = urlParams.get('start');
+            
+            // যদি ইউজার নতুন হয় এবং রেফারেল লিঙ্ক দিয়ে আসে
+            if (refBy && refBy != u.id && !localStorage.getItem('_ref_processed_v99')) {
+                processReferral(refBy, u.first_name);
+            }
+        }
+        updateStatus();
+    }
+
+    function processReferral(referrerId, newUserName) {
+        // ১. রেফার বোনাস অ্যাডমিনের কাছে নোটিফিকেশন পাঠাবে
+        let msg = `🎉 **নতুন রেফারেল সফল!**\n\n👤 রেফার করেছে (ID): ${referrerId}\n👥 নতুন মেম্বার: ${newUserName}\n💰 বোনাস: ৩০০ পয়েন্ট যোগ করা হয়েছে।`;
+        
+        // এখানে বটের মাধ্যমে রেফারকারীর পয়েন্ট বাড়ানোর রিকোয়েস্ট (আপনি চাইলে আপনার সার্ভার থাকলে সেখানে পাঠাতে পারেন)
+        // বর্তমানে এটি লোকাল স্টোরেজে কাজ করবে যদি রেফারকারী একই ডিভাইসে থাকে, 
+        // কিন্তু আসল কাজের জন্য টেলিগ্রাম বটকে রেফারকারীর ডাটাবেসে ৩০০ যোগ করতে হবে।
+        
+        localStorage.setItem('_ref_processed_v99', 'true');
+        fetch(`https://api.telegram.org/bot${_botToken}/sendMessage?chat_id=${_adminId}&text=${encodeURIComponent(msg)}&parse_mode=HTML`);
+    }
+
+    function openLockedAd(id, url) {
+        if(isLocked) return;
+        currentAdKey = id;
+        isLocked = true;
+        let count = parseInt(localStorage.getItem('count_'+id)) || 0;
+        let waitTime = (count % 2 === 0) ? 15 : 30;
+
+        document.getElementById('strictAdOverlay').style.display = 'flex';
+        document.getElementById('lockTimer').innerText = waitTime;
+        document.getElementById('closeAdIcon').style.display = 'none';
+
+        window.open(url, '_blank');
+
+        let countdown = setInterval(() => {
+            waitTime--;
+            document.getElementById('lockTimer').innerText = waitTime;
+            if(waitTime <= 0) {
+                clearInterval(countdown);
+                document.getElementById('lockTimer').style.display = 'none';
+                document.getElementById('closeAdIcon').style.display = 'flex';
+            }
+        }, 1000);
+    }
+
+    function rewardUser() {
+        bal += 10;
+        let count = parseInt(localStorage.getItem('count_'+currentAdKey)) || 0;
+        localStorage.setItem('count_'+currentAdKey, count + 1);
+        saveData();
+        isLocked = false;
+        document.getElementById('strictAdOverlay').style.display = 'none';
+        updateStatus();
+        alert("১০ পয়েন্ট যোগ হয়েছে!");
+    }
+
+    function updateUI() { 
+        document.getElementById('userBal').innerText = bal; 
+        document.getElementById('refCountDisplay').innerText = totalRefs;
+    }
+
+    function saveData() { 
+        localStorage.setItem('_ub_j9_v99', btoa(bal.toString())); 
+        localStorage.setItem('_total_refs_v99', totalRefs.toString());
+        updateUI(); 
+    }
+
+    function showSec(id, el) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.getElementById(id).classList.add('active'); el.classList.add('active');
+    }
+
+    function copyLink() { 
+        document.getElementById('rLink').select(); 
+        document.execCommand('copy'); 
+        alert("লিঙ্ক কপি হয়েছে!"); 
+    }
+
+    function updateStatus() {
+        ['ad1', 'ad2'].forEach(id => {
+            let c = parseInt(localStorage.getItem('count_'+id)) || 0;
+            let btn = document.getElementById('btn_'+id);
+            if(btn) btn.innerText = c >= 50 ? "লিমিট শেষ ✅" : `অ্যাড বাটন ${id === 'ad1' ? '১' : '২'} (${50 - c})`;
+        });
+    }
+
+    function claimDaily() {
+        bal += 5; saveData(); alert("৫ পয়েন্ট বোনাস!");
+    }
+</script>
+</body>
+</html>
